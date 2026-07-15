@@ -1,0 +1,12 @@
+# Design source material (not part of the deliverable)
+*.zip
+stitch_extracted/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+*.tmp
+*~
+.vscode/
+.idea/
