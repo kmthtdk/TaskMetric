@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Enterprise AI Platform — Program Status</title>
+<style>
+:root{--bg:#0a0f1a;--panel:#111a2b;--line:#1e2b45;--ink:#e8eefc;--dim:#94a6c9;--g:#34d399;--a:#fbbf24;--r:#f87171;--acc:#7dd3fc}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:ui-sans-serif,system-ui,"Segoe UI",Arial,sans-serif;line-height:1.5}
+.wrap{max-width:1080px;margin:0 auto;padding:2.4rem 1.4rem}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:1.2rem}
+.kick{font:600 .7rem/1 ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--acc)}
+h1{margin:.35rem 0 .1rem;font-size:2.1rem}.sub{color:var(--dim);max-width:60ch;margin:.2rem 0 0}
+.pill{font:600 .72rem/1 ui-monospace,monospace;padding:.4rem .7rem;border-radius:99px;text-transform:uppercase;letter-spacing:.08em}
+.pill.amber{background:rgba(251,191,36,.16);color:var(--a);border:1px solid rgba(251,191,36,.4)}
+.meta{display:flex;gap:1.6rem;flex-wrap:wrap;color:var(--dim);font-size:.85rem;margin-top:1rem}.meta b{color:var(--ink)}
+.grid{display:grid;gap:1rem;margin-top:1.6rem}.kpis{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:1rem 1.1rem}
+.kpi .n{font:800 2rem/1 ui-monospace,monospace;color:var(--acc)}.kpi .n small{font-size:.5em;color:var(--dim)}
+.kpi .l{font:600 .68rem/1.3 ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:.5rem}
+.kpi .t{color:var(--dim);font-size:.78rem;margin-top:.3rem}h2{font-size:1.05rem;margin:2rem 0 .7rem}
+.spr{display:flex;align-items:center;gap:.9rem;padding:.5rem 0;border-bottom:1px solid var(--line)}
+.spr .c{font:700 .78rem/1 ui-monospace,monospace;color:var(--acc);width:2.2rem}
+.spr .nm{flex:1;min-width:0}.spr .nm b{font-weight:600}.spr .nm span{color:var(--dim);font-size:.78rem;margin-left:.5rem}
+.spr .bar{width:180px;height:8px;border-radius:99px;background:#0c1526;overflow:hidden}
+.spr .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--acc),var(--g))}
+.spr .p{font:700 .85rem/1 ui-monospace,monospace;width:3rem;text-align:right}
+.epics{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}.epic b{font-weight:600}.epic .e{display:flex;justify-content:space-between;margin-bottom:.5rem}
+.epic .dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:.4rem}
+.epic .bar{height:7px;border-radius:99px;background:#0c1526;overflow:hidden}.epic .bar i{display:block;height:100%}
+table{width:100%;border-collapse:collapse;font-size:.85rem}th,td{text-align:left;padding:.55rem .5rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--dim);font-weight:600;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em}
+.tag{font:600 .68rem/1 ui-monospace,monospace;padding:.2rem .5rem;border-radius:6px}
+.H{background:rgba(248,113,113,.16);color:var(--r)}.M{background:rgba(251,191,36,.16);color:var(--a)}.L{background:rgba(52,211,153,.16);color:var(--g)}
+.note{color:#5b6b8c;font-size:.78rem;margin-top:2rem;border-top:1px solid var(--line);padding-top:1rem}.note code{background:#0c1526;padding:.05rem .35rem;border-radius:5px}
+</style></head>
+<body><div class="wrap" id="app"></div>
+<script type="application/json" id="programData">{"schema":"program-status/1.2","report":{"programme":"Enterprise AI Platform","code":"EAIP","owner":"R. Kapoor","org":"Data & AI Platform","reportingPeriod":"2026 · Q3 (W29)","asOf":"Jul 16, 2026","health":"amber","window":{"start":"Jan 05, 2026","end":"Dec 18, 2026"},"summary":"Standing up a governed, multi-tenant AI platform: feature store, model registry, serving and guardrails across 4 business units."},"sprints":[{"code":"S0","name":"Foundations","window":"Jan 05 – Feb 13","completion":100,"state":"complete"},{"code":"S1","name":"Feature Store","window":"Feb 16 – Apr 02","completion":100,"state":"complete"},{"code":"S2","name":"Model Registry","window":"Apr 06 – May 22","completion":88,"state":"in-progress"},{"code":"S3","name":"Serving & Guardrails","window":"May 25 – Aug 07","completion":46,"state":"in-progress"},{"code":"S4","name":"BU Onboarding","window":"Aug 10 – Oct 16","completion":8,"state":"planned"},{"code":"S5","name":"GA & Handover","window":"Oct 19 – Dec 18","completion":0,"state":"planned"}],"epics":[{"epic":"Feature Store","done":60,"total":60,"health":"green"},{"epic":"Model Registry","done":44,"total":50,"health":"green"},{"epic":"Serving Runtime","done":33,"total":72,"health":"amber"},{"epic":"Guardrails & Eval","done":12,"total":40,"health":"red"},{"epic":"Observability","done":18,"total":30,"health":"amber"},{"epic":"Access & Governance","done":9,"total":28,"health":"red"}],"raid":{"risks":[{"summary":"GPU capacity shortfall for serving","impact":"H","probability":"H","state":"Open","owner":"R. Kapoor","target":"Aug 05","mitigation":"Reserve A100 pool + spot fallback"},{"summary":"Guardrail eval coverage below bar","impact":"H","probability":"M","state":"Mitigating","owner":"S. Okafor","target":"Jul 30"},{"summary":"Multi-tenant isolation review pending","impact":"M","probability":"M","state":"Open","owner":"J. Lim","target":"Aug 12"}],"issues":[{"summary":"Feature backfill jobs OOM on large tenants","impact":"M","probability":"H","state":"Open","owner":"D. Park","target":"Jul 24"},{"summary":"Registry API rate limits hit in CI","impact":"L","probability":"M","state":"Resolved","owner":"A. Silva","target":"Jul 10"}]},"kpis":[{"metric":"Models in Production","current":7,"target":20,"trend":"+2 this month"},{"metric":"Platform Uptime","current":99.85,"unit":"%","trend":"SLO 99.9%"},{"metric":"Onboarded BUs","current":2,"target":4},{"metric":"Eval Pass Rate","current":63,"unit":"%","trend":"needs 90%"}],"retro":{"good":[{"title":"Feature store adoption","text":"3 teams migrated ahead of plan."}],"improve":[{"title":"Capacity forecasting","text":"GPU demand outran the quarterly plan by ~40%."}],"keep":[{"title":"Golden-path templates","text":"Cookiecutter model repo reused across 5 projects."}]},"financials":{"budgetUsd":4200000,"spentUsd":2510000,"forecastUsd":4350000},"team":[{"name":"R. Kapoor","role":"Program Lead"},{"name":"S. Okafor","role":"ML Eng Lead"}]}</script>
+<script>
+(function(){
+ var col={green:"var(--g)",amber:"var(--a)",red:"var(--r)"};
+ function esc(s){return String(s==null?"":s).replace(/[&<>]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[c]})}
+ var D; try{ D=JSON.parse(document.getElementById("programData").textContent); }catch(e){ document.getElementById("app").textContent="data error"; return; }
+ var r=D.report||{}, s=D.sprints||[], ep=D.epics||[], raid=D.raid||{}, k=D.kpis||[];
+ var overall=s.length?Math.round(s.reduce(function(a,x){return a+(+x.completion||0)},0)/s.length):0;
+ var kpis=k.map(function(x){var suf=x.target!=null?("/ "+x.target):(x.unit||"");return "<div class=\"card kpi\"><div class=\"l\">"+esc(x.metric)+"</div><div class=\"n\">"+esc(x.current)+"<small>"+esc(suf)+"</small></div><div class=\"t\">"+esc(x.trend||"")+"</div></div>"}).join("");
+ var sprints=s.map(function(x){return "<div class=\"spr\"><span class=\"c\">"+esc(x.code)+"</span><span class=\"nm\"><b>"+esc(x.name)+"</b><span>"+esc(x.window)+" · "+esc(x.state)+"</span></span><span class=\"bar\"><i style=\"width:"+(+x.completion||0)+"%\"></i></span><span class=\"p\">"+(+x.completion||0)+"%</span></div>"}).join("");
+ var epics=ep.map(function(x){var p=x.total?Math.round(x.done/x.total*100):0;return "<div class=\"card epic\"><div class=\"e\"><b><span class=\"dot\" style=\"background:"+(col[x.health]||"var(--dim)")+"\"></span>"+esc(x.epic)+"</b><span style=\"color:var(--dim)\">"+x.done+"/"+x.total+"</span></div><div class=\"bar\"><i style=\"width:"+p+"%;background:"+(col[x.health]||"var(--acc)")+"\"></i></div></div>"}).join("");
+ var allR=(raid.risks||[]).concat(raid.issues||[]);
+ var rows=allR.map(function(x){return "<tr><td>"+esc(x.summary)+"</td><td><span class=\"tag "+esc(x.impact)+"\">"+esc(x.impact)+"</span></td><td><span class=\"tag "+esc(x.probability)+"\">"+esc(x.probability)+"</span></td><td>"+esc(x.state)+"</td><td>"+esc(x.owner)+"</td><td>"+esc(x.target)+"</td></tr>"}).join("");
+ document.getElementById("app").innerHTML=
+  "<div class=\"top\"><div><div class=\"kick\">"+esc(r.reportingPeriod||"")+" · "+esc(r.org||"")+"</div><h1>"+esc(r.programme||"")+"</h1><p class=\"sub\">"+esc(r.summary||"")+"</p></div><span class=\"pill amber\">"+esc(r.health||"")+"</span></div>"+
+  "<div class=\"meta\"><span>Owner: <b>"+esc(r.owner||"")+"</b></span><span>As of: <b>"+esc(r.asOf||"")+"</b></span><span>Window: <b>"+esc((r.window||{}).start)+" → "+esc((r.window||{}).end)+"</b></span><span>Overall: <b>"+overall+"%</b></span></div>"+
+  "<div class=\"grid kpis\">"+kpis+"</div>"+
+  "<h2>Sprints</h2>"+sprints+
+  "<h2>Epics</h2><div class=\"grid epics\">"+epics+"</div>"+
+  "<h2>Risks &amp; Issues (RAID)</h2><table><thead><tr><th>Summary</th><th>Impact</th><th>Prob</th><th>State</th><th>Owner</th><th>Target</th></tr></thead><tbody>"+rows+"</tbody></table>"+
+  "<p class=\"note\">Different tool, different data shape (<code>report / sprints / epics / raid / kpis / retro</code>) — no <code>timeline</code>, <code>workstreams</code> or <code>impact/likelihood</code> fields. The Report Consolidator maps it into the report schema automatically.</p>";
+})();
+</script>
+</body></html>

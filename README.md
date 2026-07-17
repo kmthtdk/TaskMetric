@@ -40,6 +40,8 @@ When multiple people each author their own report, combine them into **one file,
    - **With the dedicated tool:** open `consolidator.html`, drag-drop the files, rename/reorder people, **Export merged report (.html)**.
 3. The merged file opens on a **Team overview** — one card per person (overall %, status, open/high risks, KPIs); click a card to open that person's full report. Each person is a project, switchable from the sidebar.
 
+Combine reads each file's embedded JSON (`<script id="savedData">`, any `application/json` block, or a raw `.json`). If a file uses a **different structure** — foreign field names / nesting such as `report / sprints / epics / raid / kpis / retro` — it is **auto-mapped** into the report schema (aliases like sprints/milestones → timeline, epics/modules → workstreams, risks+issues → risks, metrics → kpis, retro → lessons). Files with no recognisable report data are skipped with a message. Sample inputs to try live in `samples/`.
+
 `consolidator.html` is generated from `index.html` so it always matches the current design — rebuild it with `node scripts/build-consolidator.js` after changing the app.
 
 ## Tech

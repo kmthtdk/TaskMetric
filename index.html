@@ -1660,16 +1660,75 @@ function teamOpen(id){ if(!store.projects.find(x=>x.id===id)) return; switchProj
 function teamBtnSync(){ const b=$('#teamBtn'); if(b) b.style.display=store.projects.length>1?'':'none'; }
 $('#teamGrid').addEventListener('click', e=>{ const c=e.target.closest('[data-team-id]'); if(c) teamOpen(c.dataset.teamId); });
 $('#mergeFiles').addEventListener('change', e=>{ const fs=[...e.target.files]; if(fs.length) mergeReportFiles(fs); e.target.value=''; });
-/* Extract report data from an exported .html (baked <script id="savedData">) or a .json export. */
+/* ---- Read report data from exported files, tolerant of foreign structures ----
+   1) native app schema: <script id="savedData"> or any application/json block; {projects:[]} or {data:{}}
+   2) otherwise ADAPT a foreign shape (different field names / nesting) into the app schema. */
+function _num(v){ const n=parseFloat(String(v==null?'':v).replace(/[^0-9.\-]/g,'')); return isFinite(n)?n:0; }
+function _pick(o,keys){ if(o&&typeof o==='object') for(const k of keys){ if(o[k]!=null&&o[k]!=='') return o[k]; } return undefined; }
+function _firstArr(o,keys){ if(o&&typeof o==='object') for(const k of keys){ if(Array.isArray(o[k])&&o[k].length) return o[k]; } return null; }
+function _lvl(v,d){ v=String(v==null?'':v).toLowerCase().trim(); if(!v) return d; if(v[0]==='h'||v==='3'||v.indexOf('crit')>=0||v.indexOf('sev')>=0)return'high'; if(v[0]==='l'||v==='1')return'low'; if(v[0]==='m'||v==='2')return'med'; return d; }
+function _stat(v){ v=String(v==null?'':v).toLowerCase(); if(/done|complet|closed|finish|resolv|ship/.test(v))return'done'; if(/progress|active|doing|wip|ongoing|current|start/.test(v))return'active'; return'wait'; }
+function _health(v){ v=String(v==null?'':v).toLowerCase(); if(/green|track|ok|good|healthy/.test(v))return'On Track'; if(/red|off|crit/.test(v))return'Off Track'; if(/amber|yellow|risk|watch|attention/.test(v))return'At Risk'; return v?v.charAt(0).toUpperCase()+v.slice(1):''; }
+function _cat(v){ v=String(v==null?'':v).toLowerCase(); if(/well|good|keep/.test(v))return'well'; if(/improv|bad|worse/.test(v))return'improve'; return'know'; }
+function _lt(x){ return String(typeof x==='string'?x:(_pick(x,['title','name','point','text','summary'])||'')).slice(0,80); }
+function _lx(x){ return String(typeof x==='string'?'':(_pick(x,['text','desc','detail','note','description'])||'')); }
+function adaptForeign(root){
+  if(!root||typeof root!=='object'||Array.isArray(root)) return null;
+  const head=(root.report&&typeof root.report==='object')?root.report:(root.project&&typeof root.project==='object')?root.project:(root.summary&&typeof root.summary==='object')?root.summary:root;
+  const title=String(_pick(head,['programme','program','project','name','title','initiative'])||_pick(root,['programme','program','project','name','title'])||'Report');
+  const words=title.trim().split(/\s+/); const titleAccent=words.length>1?words[words.length-1]:''; const titleLead=words.length>1?words.slice(0,-1).join(' '):title;
+  const dept=String(_pick(head,['org','department','team','group','function','division','unit'])||'');
+  const win=head.window||head.timeframe||head.dates||head.duration||{};
+  const meta={ projectCode:String(_pick(head,['code','id','key','tag'])||titleLead).slice(0,24), logo:(titleLead.charAt(0)||'R').toUpperCase(),
+    eyebrow:'Progress Report'+(dept?' · '+dept:''), titleLead, titleAccent,
+    subtitle:String(_pick(head,['summary','description','desc','overview','objective','goal'])||''),
+    presenter:String(_pick(head,['owner','author','presenter','reporter','lead','pm','manager'])||''),
+    department:dept, period:String(_pick(head,['reportingPeriod','period','sprint','week','cycle','quarter'])||''),
+    updatedDate:String(_pick(head,['asOf','asof','date','updated','reportDate'])||''),
+    startDate:String((typeof win==='object'&&_pick(win,['start','from','begin']))||''),
+    endDate:String((typeof win==='object'&&_pick(win,['end','to','finish','due']))||''),
+    statusLabel:_health(_pick(head,['health','status','rag','state']))||'' };
+  const tlArr=_firstArr(root,['timeline','sprints','milestones','phases','stages','iterations','roadmap'])||[];
+  const timeline=tlArr.map((t,i)=>{ const w=(t&&(t.window||t.dates))||{}; const dstr=(typeof (t&&(t.window||t.dates))==='string')?(t.window||t.dates):'';
+    let ds=_pick(t,['dateStart','start','from'])||(typeof w==='object'?_pick(w,['start','from']):'')||''; let de=_pick(t,['dateEnd','end','to'])||(typeof w==='object'?_pick(w,['end','to']):'')||'';
+    if(!ds&&dstr&&/[–-]/.test(dstr)){ const p=dstr.split(/[–-]/); ds=(p[0]||'').trim(); de=(p[1]||'').trim(); }
+    return { idx:String(_pick(t,['idx','code','no','order','id'])||String(i+1).padStart(2,'0')).slice(0,4),
+      title:String(_pick(t,['title','name','label','phase','sprint','stage'])||('Phase '+(i+1))),
+      dateStart:String(ds), dateEnd:String(de), pct:_num(_pick(t,['pct','percent','progress','completion','complete','done'])),
+      status:_stat(_pick(t,['status','state','phase'])), icon:'target', note:String(_pick(t,['note','goal','summary','desc'])||'') }; });
+  const wsArr=_firstArr(root,['workstreams','epics','modules','streams','components','tracks','features','deliverables'])||[];
+  const workstreams=wsArr.map(w=>{ const done=_num(_pick(w,['done','completed','complete'])), tot=_num(_pick(w,['total','count','of','planned'])); let pct=_pick(w,['pct','percent','progress','completion']);
+    pct=(pct==null||pct==='')?(tot?Math.round(done/tot*100):0):_num(pct); const h=String(_pick(w,['health','tone','status','rag'])||'');
+    const tone=/green|ok|good/i.test(h)?'ok':/red|off|bad|crit/i.test(h)?'bad':/amber|warn|attention|risk/i.test(h)?'warn':'active';
+    return { name:String(_pick(w,['name','epic','module','stream','title','component','deliverable'])||'Workstream'), sub:String(_pick(w,['sub','detail','note'])||(tot?done+'/'+tot:'')), pct, tone }; });
+  const raid=root.raid||root.RAID||{};
+  const riskArr=[].concat(_firstArr(root,['risks','risk'])||raid.risks||[], _firstArr(root,['issues','blockers','impediments'])||raid.issues||[]);
+  const risks=riskArr.map(r=>({ title:String(_pick(r,['title','summary','name','risk','issue'])||'Item'), desc:String(_pick(r,['desc','description','detail','mitigation','plan'])||''),
+    impact:_lvl(_pick(r,['impact','severity','sev']),'med'), likelihood:_lvl(_pick(r,['likelihood','probability','prob','chance']),'med'),
+    status:String(_pick(r,['status','state'])||'Open'), owner:String(_pick(r,['owner','assignee','lead'])||''), due:String(_pick(r,['due','target','deadline','date','eta'])||'') }));
+  const kArr=_firstArr(root,['kpis','metrics','measures','indicators','stats'])||[];
+  const kpis=kArr.map(k=>{ const target=_pick(k,['target','goal','of','max']); const unit=_pick(k,['unit','suffix'])||'';
+    return { label:String(_pick(k,['label','metric','name','kpi','measure'])||'Metric'), value:_num(_pick(k,['value','current','val','count','actual'])),
+      suffix:String((target!=null&&target!=='')?('/ '+target):unit), sub:String(_pick(k,['sub','note','caption','trend'])||''), tone:'', icon:'target' }; });
+  const lessons=[]; const retro=root.retro||root.retrospective||root.lessons||root.learnings;
+  if(retro&&!Array.isArray(retro)&&typeof retro==='object'){ (retro.good||retro.well||retro.wentWell||[]).forEach(x=>lessons.push({category:'well',title:_lt(x),text:_lx(x)})); (retro.improve||retro.bad||retro.toImprove||[]).forEach(x=>lessons.push({category:'improve',title:_lt(x),text:_lx(x)})); (retro.keep||retro.know||retro.learn||retro.actions||[]).forEach(x=>lessons.push({category:'know',title:_lt(x),text:_lx(x)})); }
+  else if(Array.isArray(retro)){ retro.forEach(x=>lessons.push({category:_cat(x&&(x.category||x.type)),title:_lt(x),text:_lx(x)})); }
+  const data={ meta, kpis, timeline, workstreams, risks, lessons, charts:[{id:'c1',title:'Progress by Workstream',type:'hbar',source:'workstreams'},{id:'c2',title:'Risk Distribution',type:'donut',source:'risks'}], media:[] };
+  return (timeline.length||workstreams.length||risks.length||kpis.length)?data:null;
+}
 function extractReports(text, fname){
-  const out=[]; let json=null; const t=String(text).trim();
-  if(t[0]==='{'||t[0]==='['){ try{ json=JSON.parse(t); }catch(e){} }
-  if(!json){ const m=text.match(/<script id="savedData"[^>]*>([\s\S]*?)<\/script>/i); if(m&&m[1].trim()){ try{ json=JSON.parse(m[1]); }catch(e){} } }
-  if(!json) return out;
-  const base=String(fname||'').replace(/\.[^.]+$/,'').replace(/-standalone$/,'').replace(/^report-/,'')||'Report';
+  const out=[]; const base=String(fname||'').replace(/\.[^.]+$/,'').replace(/-standalone$/,'').replace(/^report-/,'')||'Report';
   const nm=d=>d&&d.meta&&(d.meta.presenter||d.meta.department||d.meta.projectCode);
-  if(Array.isArray(json.projects)&&json.projects.length){ json.projects.forEach(pr=>{ const d=pr&&pr.data; if(d&&d.meta) out.push({name:String(pr.name||nm(d)||base), data:d}); }); }
-  else { const d=json.data||json; if(d&&d.meta&&Array.isArray(d.timeline)) out.push({name:String(nm(d)||base), data:d}); }
+  const cands=[]; const t=String(text).trim();
+  if(t.charAt(0)==='{'||t.charAt(0)==='['){ try{ cands.push(JSON.parse(t)); }catch(e){} }
+  const re=/<script[^>]*type=["']application\/json["'][^>]*>([\s\S]*?)<\/script>/gi; let m;
+  while((m=re.exec(text))){ const s=(m[1]||'').trim(); if(s){ try{ cands.push(JSON.parse(s)); }catch(e){} } }
+  // 1) native app schema (single or projects[])
+  for(const j of cands){ if(!j||typeof j!=='object') continue;
+    if(Array.isArray(j.projects)&&j.projects.length){ const before=out.length; j.projects.forEach(pr=>{ const d=pr&&pr.data; if(d&&d.meta&&Array.isArray(d.timeline)) out.push({name:String(pr.name||nm(d)||base),data:d}); }); if(out.length>before) return out; }
+    const d=j.data||j; if(d&&d.meta&&Array.isArray(d.timeline)){ out.push({name:String(nm(d)||base),data:d}); return out; } }
+  // 2) foreign shape -> adapt into the app schema
+  for(const j of cands){ const ad=adaptForeign(j&&j.data?j.data:j); if(ad){ out.push({name:String((ad.meta&&(ad.meta.presenter||ad.meta.department))||base),data:ad,adapted:true}); return out; } }
   return out;
 }
 function mergeReportFiles(files){
