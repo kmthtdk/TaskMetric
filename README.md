@@ -30,6 +30,18 @@ Built as a lightweight alternative to PowerPoint for recurring executive status 
 
 > **Data safety:** `localStorage` is a per-browser scratch cache. The canonical backup is **Export data → JSON** or **Save as file (.html)**.
 
+## Consolidating several people's reports
+
+When multiple people each author their own report, combine them into **one file, split by person**:
+
+1. Each person exports their report — **Save as file (.html)** or **Export → JSON** (setting *Presented by* names them).
+2. Merge, either way:
+   - **In the app:** **Import data → Merge report files** and pick everyone's `.html`/`.json` at once, or
+   - **With the dedicated tool:** open `consolidator.html`, drag-drop the files, rename/reorder people, **Export merged report (.html)**.
+3. The merged file opens on a **Team overview** — one card per person (overall %, status, open/high risks, KPIs); click a card to open that person's full report. Each person is a project, switchable from the sidebar.
+
+`consolidator.html` is generated from `index.html` so it always matches the current design — rebuild it with `node scripts/build-consolidator.js` after changing the app.
+
 ## Tech
 
 Plain HTML + CSS + vanilla JavaScript. No frameworks, no bundler, no network calls at runtime.

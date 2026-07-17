@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Report Consolidator</title>
+<style>
+  :root{
+    --primary:#065f46; --secondary:#4b6d00; --lime:#7aa800; --accent:#a4d64c;
+    --ink:#12211b; --muted:#5b6470; --surface:#f5f7f6; --card:#ffffff;
+    --line:#e2e5e9; --line2:#eceef0; --error:#ba1a1a; --amber:#a86a00;
+    --radius:16px; --ease:cubic-bezier(.16,1,.3,1);
+    font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--surface);color:var(--ink);line-height:1.55}
+  .wrap{max-width:920px;margin:0 auto;padding:clamp(1.2rem,4vw,3rem)}
+  header h1{font-size:clamp(1.6rem,3.4vw,2.4rem);margin:0 0 .25rem;letter-spacing:-.01em}
+  .eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--secondary)}
+  header p{color:var(--muted);margin:.35rem 0 0;max-width:60ch}
+  .steps{display:flex;gap:.6rem;flex-wrap:wrap;margin:1.2rem 0 1.4rem;font-size:.82rem;color:var(--muted)}
+  .steps b{color:var(--ink)}
+  .drop{border:2px dashed var(--line);border-radius:var(--radius);background:var(--card);
+    padding:2.4rem 1.5rem;text-align:center;cursor:pointer;transition:border-color .15s,background .15s,transform .15s var(--ease)}
+  .drop:hover{border-color:var(--primary)}
+  .drop.over{border-color:var(--primary);background:#f0f7f3;transform:translateY(-2px)}
+  .drop svg{width:40px;height:40px;stroke:var(--primary);fill:none;stroke-width:1.6;margin-bottom:.5rem}
+  .drop h2{margin:.2rem 0 .15rem;font-size:1.1rem}
+  .drop small{color:var(--muted)}
+  .list{margin:1.4rem 0 0;display:flex;flex-direction:column;gap:.55rem}
+  .row{display:flex;align-items:center;gap:.75rem;background:var(--card);border:1px solid var(--line);
+    border-radius:12px;padding:.6rem .75rem}
+  .row .ord{font-family:ui-monospace,Consolas,monospace;font-size:.8rem;color:var(--muted);min-width:1.5rem;text-align:center}
+  .row .pct{font-family:ui-monospace,Consolas,monospace;font-weight:700;color:var(--primary);min-width:3rem;text-align:right}
+  .row input.nm{flex:1;min-width:0;border:1px solid transparent;background:transparent;border-radius:8px;
+    padding:.35rem .5rem;font:inherit;font-weight:600;color:var(--ink)}
+  .row input.nm:hover{border-color:var(--line2)}
+  .row input.nm:focus{outline:none;border-color:var(--primary);background:#fff}
+  .row .src{font-size:.72rem;color:var(--muted);max-width:16ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .row button{border:1px solid var(--line);background:#fff;border-radius:8px;width:30px;height:30px;cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;color:var(--muted);flex:none}
+  .row button:hover{border-color:var(--primary);color:var(--primary)}
+  .row button.rm:hover{border-color:var(--error);color:var(--error)}
+  .row button svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+  .bar{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-top:1.5rem}
+  .count{color:var(--muted);font-size:.9rem}
+  .btn{border:none;border-radius:10px;padding:.7rem 1.2rem;font:inherit;font-weight:600;cursor:pointer;
+    display:inline-flex;align-items:center;gap:.5rem;transition:filter .15s,opacity .15s}
+  .btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
+  .btn-primary{background:var(--primary);color:#fff}
+  .btn-primary:hover{filter:brightness(1.08)}
+  .btn-primary:disabled{opacity:.45;cursor:not-allowed;filter:none}
+  .btn-ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}
+  .btn-ghost:hover{border-color:var(--primary)}
+  .msg{margin-top:.9rem;font-size:.85rem;min-height:1.2em}
+  .msg.ok{color:var(--secondary)}
+  .msg.err{color:var(--error)}
+  .empty{color:var(--muted);font-size:.9rem;text-align:center;padding:.5rem 0}
+  footer{margin-top:2.2rem;color:var(--muted);font-size:.78rem;border-top:1px solid var(--line2);padding-top:1rem}
+  footer code{background:#eef1f0;padding:.05rem .35rem;border-radius:5px;font-size:.9em}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <span class="eyebrow">Project Progress Report</span>
+      <h1>Report Consolidator</h1>
+      <p>Combine several people's exported reports into one file, split by person. Everything runs offline in your browser &mdash; nothing is uploaded.</p>
+      <div class="steps">
+        <span><b>1.</b> Drop each person's <b>.html</b> or <b>.json</b> export</span>
+        <span><b>2.</b> Check / rename people</span>
+        <span><b>3.</b> Export one merged report</span>
+      </div>
+    </header>
+
+    <div class="drop" id="drop">
+      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <h2>Drop report files here</h2>
+      <small>or click to choose &mdash; .html or .json exported by the report app · pick several at once</small>
+      <input type="file" id="file" accept=".html,.json,text/html,application/json" multiple hidden />
+    </div>
+
+    <div class="list" id="list"></div>
+
+    <div class="bar">
+      <span class="count" id="count"></span>
+      <span style="flex:1"></span>
+      <button class="btn btn-ghost" id="clearBtn" style="display:none" onclick="clearAll()">
+        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg> Clear
+      </button>
+      <button class="btn btn-primary" id="exportBtn" onclick="exportMerged()" disabled>
+        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Export merged report (.html)
+      </button>
+    </div>
+    <div class="msg" id="msg"></div>
+
+    <footer>
+      Output opens straight into a <b>Team overview</b>: one card per person &rarr; click to open their full report.
+      Rebuilt from the app template, so it always matches the current report design. Regenerate with
+      <code>node scripts/build-consolidator.js</code> after changing <code>index.html</code>.
+    </footer>
+  </div>
+
+<script>
+/* The full report app, base64(UTF-8)-encoded, injected at build time. */
+const APP_B64="__APP_B64__";
+function b64ToText(b64){ const bin=atob(b64); const bytes=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i); return new TextDecoder('utf-8').decode(bytes); }
+
+let _idc=0;
+const uid=()=>'id'+Date.now().toString(36)+(_idc++).toString(36);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clamp=n=>Math.max(0,Math.min(100,Number(n)||0));
+function pOverall(d){ const a=(d&&d.timeline)||[]; if(!a.length) return 0; return Math.round(a.reduce((s,t)=>s+clamp(t.pct),0)/a.length); }
+
+/* Read report data from an exported .html (baked savedData) or a raw .json export. */
+function extractReports(text, fname){
+  const out=[]; let json=null; const t=String(text).trim();
+  if(t[0]==='{'||t[0]==='['){ try{ json=JSON.parse(t); }catch(e){} }
+  if(!json){ const m=text.match(/<script id="savedData"[^>]*>([\s\S]*?)<\/script>/i); if(m&&m[1].trim()){ try{ json=JSON.parse(m[1]); }catch(e){} } }
+  if(!json) return out;
+  const base=String(fname||'').replace(/\.[^.]+$/,'').replace(/-standalone$/,'').replace(/^report-/,'')||'Report';
+  const nm=d=>d&&d.meta&&(d.meta.presenter||d.meta.department||d.meta.projectCode);
+  if(Array.isArray(json.projects)&&json.projects.length){ json.projects.forEach(pr=>{ const d=pr&&pr.data; if(d&&d.meta) out.push({name:String(pr.name||nm(d)||base), data:d}); }); }
+  else { const d=json.data||json; if(d&&d.meta&&Array.isArray(d.timeline)) out.push({name:String(nm(d)||base), data:d}); }
+  return out;
+}
+
+let people=[]; // {id, name, data, src}
+const $=s=>document.querySelector(s);
+
+function renderList(){
+  const list=$('#list');
+  if(!people.length){ list.innerHTML='<div class="empty">No reports added yet.</div>'; }
+  else list.innerHTML=people.map((p,i)=>`
+    <div class="row" data-i="${i}">
+      <span class="ord">${String(i+1).padStart(2,'0')}</span>
+      <input class="nm" value="${esc(p.name)}" oninput="rename(${i},this.value)" aria-label="Person name" />
+      <span class="src" title="${esc(p.src)}">${esc(p.src)}</span>
+      <span class="pct">${pOverall(p.data)}%</span>
+      <button title="Move up" onclick="moveP(${i},-1)"><svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg></button>
+      <button title="Move down" onclick="moveP(${i},1)"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <button class="rm" title="Remove" onclick="removeP(${i})"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>`).join('');
+  $('#count').textContent=people.length?people.length+' report'+(people.length===1?'':'s')+' · '+new Set(people.map(p=>p.name.toLowerCase())).size+' unique name'+(new Set(people.map(p=>p.name.toLowerCase())).size===1?'':'s'):'';
+  $('#exportBtn').disabled=!people.length;
+  $('#clearBtn').style.display=people.length?'':'none';
+}
+function rename(i,v){ if(people[i]) people[i].name=v; }
+function moveP(i,d){ const j=i+d; if(j<0||j>=people.length) return; [people[i],people[j]]=[people[j],people[i]]; renderList(); }
+function removeP(i){ people.splice(i,1); renderList(); }
+function clearAll(){ people=[]; renderList(); setMsg(''); }
+function setMsg(t,cls){ const m=$('#msg'); m.textContent=t; m.className='msg'+(cls?' '+cls:''); }
+
+function addFiles(files){
+  const arr=[...files]; if(!arr.length) return;
+  let done=0, added=0, fail=0; const total=arr.length;
+  const finish=()=>{ if(++done<total) return; renderList();
+    setMsg(added?('Added '+added+' report'+(added===1?'':'s')+(fail?' — '+fail+' file'+(fail===1?'':'s')+' skipped (no report data)':'')):'No report data found — use .html/.json exported by the report app', added?'ok':'err'); };
+  arr.forEach(f=>{ const r=new FileReader();
+    r.onload=()=>{ try{ const reps=extractReports(r.result,f.name); if(!reps.length) fail++; else reps.forEach(rep=>{ people.push({id:uid(), name:(rep.name||'Report').trim().slice(0,60)||'Report', data:rep.data, src:f.name}); added++; }); }catch(e){ fail++; } finish(); };
+    r.onerror=()=>{ fail++; finish(); };
+    r.readAsText(f);
+  });
+}
+
+function downloadBlob(name,text,mime){ const b=new Blob([text],{type:mime+';charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href); }
+
+function exportMerged(){
+  if(!people.length) return;
+  const store={ schemaVersion:2, fileId:uid(), savedAt:new Date().toISOString(), activeId:people[0].id,
+    projects:people.map(p=>({id:p.id, name:(p.name||'Report').trim()||'Report', data:p.data})) };
+  const payload=JSON.stringify(store).replace(/</g,'\\u003c');
+  const tpl=b64ToText(APP_B64);
+  const TARGET='<script id="savedData" type="application/json"><\/script>';
+  if(tpl.indexOf(TARGET)<0){ setMsg('Template error: savedData slot not found — rebuild the consolidator.','err'); return; }
+  const out=tpl.replace(TARGET, '<script id="savedData" type="application/json">'+payload+'<\/script>');
+  downloadBlob('consolidated-report.html', out, 'text/html');
+  setMsg('Exported consolidated-report.html — '+people.length+' people, opens on the Team overview.','ok');
+}
+
+/* drag & drop + click */
+const drop=$('#drop'), fileInput=$('#file');
+drop.addEventListener('click',()=>fileInput.click());
+fileInput.addEventListener('change',e=>{ addFiles(e.target.files); e.target.value=''; });
+['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{ e.preventDefault(); drop.classList.add('over'); }));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{ e.preventDefault(); if(ev==='drop'||e.target===drop) drop.classList.remove('over'); }));
+drop.addEventListener('drop',e=>{ const f=e.dataTransfer&&e.dataTransfer.files; if(f&&f.length) addFiles(f); });
+window.addEventListener('dragover',e=>e.preventDefault());
+window.addEventListener('drop',e=>e.preventDefault());
+renderList();
+</script>
+</body>
+</html>
