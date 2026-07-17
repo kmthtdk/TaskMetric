@@ -489,6 +489,38 @@
     .kpi,.phase-card,.panel,.risk-card,.lesson-card,.callout,.co-risk,.matrix-wrap{box-shadow:none;break-inside:avoid}
     .timeline{gap:1.5rem}.t-row{break-inside:avoid}
   }
+/* ---- Team / portfolio overview (multi-person consolidation) ---- */
+.team-ov{position:fixed;inset:0;z-index:120;background:var(--surface,#f7f9fb);overflow:auto;padding:clamp(1.2rem,4vw,3rem);opacity:0;transition:opacity .2s var(--ease,ease)}
+.team-ov.on{opacity:1}
+body.team-open{overflow:hidden}
+.team-head{display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;flex-wrap:wrap;max-width:1200px;margin:0 auto 1.5rem}
+.team-head h2{font-family:var(--f-display,inherit);font-size:clamp(1.6rem,3vw,2.4rem);margin:.15rem 0}
+.team-head .eyebrow{color:var(--secondary)}
+.team-head #teamCount{color:var(--on-surface-variant,#5b6470)}
+.team-actions{display:flex;gap:.5rem;flex-wrap:wrap}
+.team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;max-width:1200px;margin:0 auto}
+.tv-card{text-align:left;background:var(--surface-container,#fff);border:1px solid var(--outline-variant,#e2e5e9);border-radius:16px;padding:1.1rem 1.2rem;cursor:pointer;transition:transform .15s var(--ease,ease),box-shadow .15s,border-color .15s;display:flex;flex-direction:column;gap:.65rem;font:inherit;color:inherit}
+.tv-card:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(6,95,70,.12);border-color:var(--primary)}
+.tv-card.active{border-color:var(--secondary);box-shadow:0 0 0 2px var(--secondary-container,#d7f5c8) inset}
+.tv-top{display:flex;justify-content:space-between;align-items:baseline;gap:.5rem}
+.tv-name{font-family:var(--f-display,inherit);font-weight:700;font-size:1.15rem;line-height:1.2}
+.tv-pct{font-family:var(--f-mono,monospace);font-weight:700;font-size:1.45rem;color:var(--primary);white-space:nowrap}
+.tv-pct small{font-size:.55em;opacity:.7;margin-left:.05em}
+.tv-bar{height:8px;border-radius:99px;background:var(--surface-container-high,#eceef0);overflow:hidden}
+.tv-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--secondary),var(--primary))}
+.tv-kpis{display:flex;gap:1rem;flex-wrap:wrap}
+.tv-kpi{display:flex;flex-direction:column;gap:.1rem}
+.tv-kpi .caps{font-size:.6rem;letter-spacing:.08em;color:var(--on-surface-variant,#5b6470)}
+.tv-kpi b{font-family:var(--f-mono,monospace);font-size:1rem}
+.tv-kpi b small{font-size:.68em;opacity:.65;margin-left:.15em}
+.tv-empty{font-size:.8rem;color:var(--outline,#9aa3ad)}
+.tv-meta{display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin-top:auto;padding-top:.55rem;border-top:1px solid var(--outline-variant,#eceef0);font-size:.78rem}
+.tv-status{color:var(--on-surface-variant,#5b6470)}
+.tv-risk{font-family:var(--f-mono,monospace);color:var(--on-surface-variant,#5b6470)}
+.tv-risk.warn{color:var(--amber,#a86a00)}
+.tv-risk.hi{color:var(--error,#ba1a1a);font-weight:600}
+.team-foot{max-width:1200px;margin:1.5rem auto 0;color:var(--on-surface-variant,#5b6470);font-size:.85rem}
+@media print{.team-ov{display:none!important}}
 </style>
 </head>
 <body>
@@ -544,6 +576,7 @@
           <a href="#workstreams">Workstreams</a>
           <a href="#risks">Risks</a>
         </nav>
+        <button id="teamBtn" class="btn btn-ghost" style="display:none" onclick="openTeam()" title="Team overview — all people"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg> Team</button>
       </div>
       <div class="right">
         <span class="saved" id="savedInd"></span>
@@ -623,6 +656,24 @@
     </div>
   </main>
 
+  <!-- ===================== TEAM / PORTFOLIO OVERVIEW ===================== -->
+  <div class="team-ov" id="teamOv" hidden role="region" aria-label="Team overview">
+    <div class="team-head">
+      <div>
+        <span class="caps eyebrow">Consolidated report</span>
+        <h2>Team overview</h2>
+        <p id="teamCount" class="caps"></p>
+      </div>
+      <div class="team-actions">
+        <button class="btn btn-ghost" onclick="document.getElementById('mergeFiles').click()"><svg class="ic" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add reports</button>
+        <button class="btn btn-ghost" onclick="saveStandalone()"><svg class="ic" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save merged (.html)</button>
+        <button class="btn btn-primary" onclick="closeTeam()"><svg class="ic" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Close</button>
+      </div>
+    </div>
+    <div class="team-grid" id="teamGrid"></div>
+    <p class="team-foot">Click a person to open their full report. Add each person's exported <b>.html</b> or <b>.json</b> via <b>Add reports</b>, then <b>Save merged (.html)</b> to export one consolidated file (everyone's data &amp; media baked in).</p>
+  </div>
+
   <!-- ===================== EDITOR DRAWER ===================== -->
   <div class="backdrop" id="backdrop" onclick="closeDrawer()"></div>
   <aside class="drawer" id="drawer" aria-hidden="true">
@@ -648,6 +699,10 @@
       <p>Open formats supported: <b>JSON</b> (a full report) or <b>CSV</b> (one section — e.g. exported from Excel / Google Sheets). Columns are auto-mapped by header name.</p>
       <button class="btn btn-ghost btn-file" onclick="document.getElementById('impFile').click()"><svg class="ic" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Choose file (.json, .csv)</button>
       <input type="file" id="impFile" accept=".json,.csv,application/json,text/csv" style="display:none" />
+      <div class="form-sep" style="margin:1.1rem 0 .5rem">Consolidate — combine several people's reports</div>
+      <p style="font-size:.85rem;color:var(--on-surface-variant);margin:0 0 .6rem">Add each person's exported report (<b>.html</b> or <b>.json</b>) as its own project. Select several files at once — a <b>Team overview</b> then lets you switch between people and save one merged file.</p>
+      <button class="btn btn-ghost btn-file" onclick="document.getElementById('mergeFiles').click()"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg> Merge report files (.html / .json)</button>
+      <input type="file" id="mergeFiles" accept=".html,.json,text/html,application/json" multiple style="display:none" />
       <div id="impInfo"></div>
       <div class="imp-opts" id="impCsvOpts" style="display:none">
         <div class="row"><label class="flbl" style="min-width:120px">Import into section</label>
@@ -1017,11 +1072,15 @@ function saveStandalone(){
   closeDrawer(); closeImport(); closeExport();
   $('#toast').classList.remove('show'); document.body.classList.remove('nav-open');
   const pel=$('#pres'); pel.classList.remove('on','blank'); pel.hidden=true;
+  const tv=$('#teamOv'); const tvWasOpen=tv&&!tv.hidden; if(tv){ tv.hidden=true; tv.classList.remove('on'); document.body.classList.remove('team-open'); }
   const holder=document.getElementById('savedData'); const prev=holder.textContent;
-  holder.textContent=JSON.stringify({schemaVersion:SCHEMA, fileId:uid(), savedAt:new Date().toISOString(), data:state}).replace(/</g,'\\u003c');
+  // Bake the WHOLE store (every project = every person) so a consolidated file
+  // round-trips through Save-as-file. loadStore() already reads projects[].
+  holder.textContent=JSON.stringify({schemaVersion:SCHEMA, fileId:uid(), savedAt:new Date().toISOString(), activeId:store.activeId, projects:store.projects}).replace(/</g,'\\u003c');
   const html='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
   holder.textContent=prev;
-  downloadBlob(projSlug()+'-standalone.html', html, 'text/html');
+  downloadBlob((store.projects.length>1?'consolidated-report':projSlug())+'-standalone.html', html, 'text/html');
+  if(tvWasOpen){ tv.hidden=false; tv.classList.add('on'); document.body.classList.add('team-open'); }
   if(wasEdit) toggleEdit();
   toast('Saved standalone HTML — data & media baked in');
 }
@@ -1575,6 +1634,57 @@ window.addEventListener('beforeunload', e=>{ if(_saveFailed){ e.preventDefault()
 $('#impFile').addEventListener('change', e=>{ const f=e.target.files[0]; if(f) onImpFile(f); e.target.value=''; });
 window.addEventListener('beforeprint', ()=>applyEnhancements(document.querySelector('.canvas'), false));
 /* =========================================================
+   TEAM / PORTFOLIO OVERVIEW  (multi-person consolidation)
+   Each project = one person's report. The overview lists everyone;
+   click a card to open that person's full report; Save merged (.html)
+   exports one file carrying every person's data + media.
+   ========================================================= */
+function pOverall(d){ const a=(d&&d.timeline)||[]; if(!a.length) return 0; return Math.round(a.reduce((s,t)=>s+clamp(t.pct),0)/a.length); }
+function pOpenRisks(d){ return ((d&&d.risks)||[]).filter(r=>!/clos|resolv|done|complete/i.test(String(r.status||''))).length; }
+function pHighRisks(d){ return ((d&&d.risks)||[]).filter(r=>riskSeverity(r)==='high').length; }
+function renderTeam(){
+  return store.projects.map(p=>{ const d=p.data||{}, pct=pOverall(d), st=(d.meta&&d.meta.statusLabel)||'', open=pOpenRisks(d), hi=pHighRisks(d), act=p.id===store.activeId;
+    const kpis=(d.kpis||[]).slice(0,3).map(k=>`<div class="tv-kpi"><span class="caps">${esc(k.label)}</span><b>${esc(String(k.value))}${k.suffix?`<small>${esc(k.suffix)}</small>`:''}</b></div>`).join('');
+    return `<button class="tv-card ${act?'active':''}" data-team-id="${esc(p.id)}" title="Open ${esc(p.name)}">
+      <div class="tv-top"><span class="tv-name">${esc(p.name)}</span><span class="tv-pct">${pct}<small>%</small></span></div>
+      <div class="tv-bar"><i style="width:${pct}%"></i></div>
+      <div class="tv-kpis">${kpis||'<span class="tv-empty">No KPIs</span>'}</div>
+      <div class="tv-meta"><span class="tv-status">${esc(st||'—')}</span><span class="tv-risk ${hi?'hi':(open?'warn':'')}">${open} open · ${hi} high risk</span></div>
+    </button>`;
+  }).join('');
+}
+function teamRefresh(){ const g=$('#teamGrid'); if(g) g.innerHTML=renderTeam(); const c=$('#teamCount'); if(c) c.textContent=store.projects.length+' report'+(store.projects.length===1?'':'s'); }
+function openTeam(){ teamRefresh(); const el=$('#teamOv'); if(!el) return; el.hidden=false; requestAnimationFrame(()=>el.classList.add('on')); document.body.classList.add('team-open'); }
+function closeTeam(){ const el=$('#teamOv'); if(!el) return; el.classList.remove('on'); document.body.classList.remove('team-open'); setTimeout(()=>{ el.hidden=true; }, 200); }
+function teamOpen(id){ if(!store.projects.find(x=>x.id===id)) return; switchProject(id); closeTeam(); window.scrollTo(0,0); }
+function teamBtnSync(){ const b=$('#teamBtn'); if(b) b.style.display=store.projects.length>1?'':'none'; }
+$('#teamGrid').addEventListener('click', e=>{ const c=e.target.closest('[data-team-id]'); if(c) teamOpen(c.dataset.teamId); });
+$('#mergeFiles').addEventListener('change', e=>{ const fs=[...e.target.files]; if(fs.length) mergeReportFiles(fs); e.target.value=''; });
+/* Extract report data from an exported .html (baked <script id="savedData">) or a .json export. */
+function extractReports(text, fname){
+  const out=[]; let json=null; const t=String(text).trim();
+  if(t[0]==='{'||t[0]==='['){ try{ json=JSON.parse(t); }catch(e){} }
+  if(!json){ const m=text.match(/<script id="savedData"[^>]*>([\s\S]*?)<\/script>/i); if(m&&m[1].trim()){ try{ json=JSON.parse(m[1]); }catch(e){} } }
+  if(!json) return out;
+  const base=String(fname||'').replace(/\.[^.]+$/,'').replace(/-standalone$/,'').replace(/^report-/,'')||'Report';
+  const nm=d=>d&&d.meta&&(d.meta.presenter||d.meta.department||d.meta.projectCode);
+  if(Array.isArray(json.projects)&&json.projects.length){ json.projects.forEach(pr=>{ const d=pr&&pr.data; if(d&&d.meta) out.push({name:String(pr.name||nm(d)||base), data:d}); }); }
+  else { const d=json.data||json; if(d&&d.meta&&Array.isArray(d.timeline)) out.push({name:String(nm(d)||base), data:d}); }
+  return out;
+}
+function mergeReportFiles(files){
+  const total=files.length; let done=0, added=0, fail=0;
+  const finish=()=>{ if(++done<total) return; saveState(); renderProjSelect(); teamBtnSync();
+    if(added){ closeImport(); openTeam(); toast('Merged '+added+' report'+(added===1?'':'s')+(fail?' — '+fail+' file'+(fail===1?'':'s')+' skipped (no report data)':'')); }
+    else toast('No report data found — use files exported by this app (.html or .json)'); };
+  files.forEach(f=>{ const r=new FileReader();
+    r.onload=()=>{ try{ const reps=extractReports(r.result, f.name); if(!reps.length) fail++; else reps.forEach(rep=>{ store.projects.push({id:uid(), name:(rep.name||'Report').trim().slice(0,60)||'Report', data:coerceData(rep.data)}); added++; }); }catch(e){ fail++; } finish(); };
+    r.onerror=()=>{ fail++; finish(); };
+    r.readAsText(f);
+  });
+}
+
+/* =========================================================
    PRESENTATION MODE — slide deck built from state (airgap-safe)
    ========================================================= */
 const pres={slides:[], i:0};
@@ -1758,6 +1868,8 @@ try{ if(localStorage.getItem('ppr:nav')==='1') document.body.classList.add('nav-
 setSaved('Ready');
 renderProjSelect();
 render(true);
+teamBtnSync();
+if(store.projects.length>1) openTeam();
 if(_bakedError) setTimeout(()=>toast('Embedded report data could not be read (file may be incomplete) — showing sample data.'), 500);
 </script>
 </body>
