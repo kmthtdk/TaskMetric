@@ -5,13 +5,11 @@
   body{margin:0;background:#0b1220;color:#e6edf6;font-family:ui-sans-serif,system-ui,Segoe UI,Arial,sans-serif;line-height:1.5}
   .wrap{max-width:680px;margin:0 auto;padding:2.5rem 1.5rem}
   .tag{font:600 .7rem/1 ui-monospace,monospace;letter-spacing:.15em;text-transform:uppercase;color:#5eead4}
-  h1{font-size:2rem;margin:.3rem 0 .1rem}
-  .by{color:#93a4bd;margin:0 0 1.4rem}
+  h1{font-size:2rem;margin:.3rem 0 .1rem}.by{color:#93a4bd;margin:0 0 1.4rem}
   .big{font:800 3.2rem/1 ui-monospace,monospace;color:#a3e635}
   table{width:100%;border-collapse:collapse;margin:1.2rem 0}
   th,td{text-align:left;padding:.5rem .4rem;border-bottom:1px solid #1e293b;font-size:.9rem}
-  th{color:#93a4bd;font-weight:600}
-  .note{color:#64748b;font-size:.8rem;margin-top:1.5rem}
+  th{color:#93a4bd;font-weight:600}.note{color:#64748b;font-size:.8rem;margin-top:1.5rem}
 </style></head>
 <body>
   <div class="wrap">
@@ -23,21 +21,20 @@
     <table><thead><tr><th>#</th><th>Phase</th><th>Dates</th><th>%</th><th>Status</th></tr></thead><tbody id="rows"></tbody></table>
     <p class="note">This file uses a completely different layout, but it embeds the same <code>savedData</code> contract — so the Report Consolidator can still combine it. Open <code>consolidator.html</code> and drop this file in.</p>
   </div>
-  <!-- The data contract that the consolidator reads: -->
   <script id="savedData" type="application/json">{"schemaVersion":2,"fileId":"sampleB","savedAt":"2026-07-15T09:00:00.000Z","data":{"meta":{"projectCode":"DCM","logo":"D","eyebrow":"Progress Report · Infrastructure","titleLead":"Data Center","titleAccent":"Migration","region":"APAC","subtitle":"Migrating 60 legacy workloads from the on-prem DC to the new colocation facility with zero-downtime cutover and DR validation.","presenter":"M. Tran","department":"Infrastructure","period":"Week 24 · 2026","updatedDate":"Jul 15, 2026","startDate":"Jan 15, 2026","endDate":"Jul 31, 2026","statusLabel":"At Risk"},"kpis":[{"label":"Workloads Migrated","value":22,"suffix":"/ 60","sub":"Wave 1 of 2","tone":"up","icon":"check"},{"label":"Unplanned Downtime","value":0,"suffix":"min","sub":"Zero so far","tone":"","icon":"clock"},{"label":"DR Tests Passed","value":4,"suffix":"/ 10","sub":"2 failed, retrying","tone":"warn","icon":"alert"}],"timeline":[{"idx":"01","title":"Assessment","dateStart":"Jan 15","dateEnd":"Feb 14","pct":100,"status":"done","icon":"search","note":"60 workloads profiled"},{"idx":"02","title":"Network Buildout","dateStart":"Feb 17","dateEnd":"Mar 27","pct":100,"status":"done","icon":"layout","note":"Dual 10G links live"},{"idx":"03","title":"Wave 1 Migration","dateStart":"Mar 30","dateEnd":"Jun 05","pct":60,"status":"active","icon":"rocket","note":"22/40 apps moved"},{"idx":"04","title":"Wave 2 Migration","dateStart":"Jun 08","dateEnd":"Jul 17","pct":20,"status":"active","icon":"rocket","note":"DB tier next"},{"idx":"05","title":"Decommission","dateStart":"Jul 20","dateEnd":"Jul 31","pct":0,"status":"wait","icon":"flag","note":"Power down old DC"}],"workstreams":[{"name":"Compute & Storage","sub":"32/40 nodes","pct":80,"tone":"active"},{"name":"Networking","sub":"complete","pct":100,"tone":"ok"},{"name":"Wave 1 Apps","sub":"22/40 apps","pct":60},{"name":"Wave 2 Apps","sub":"4/20 apps","pct":20,"tone":"warn"},{"name":"DR Validation","sub":"4/10 tests","pct":10,"tone":"bad"}],"risks":[{"title":"Cutover window overrun","severity":"high","likelihood":"high","status":"Open","desc":"Wave 2 DB cutover may exceed the 4-hour maintenance window.","owner":"M. Tran","due":"Jul 22"},{"title":"Legacy app compatibility","impact":"high","likelihood":"med","status":"Mitigating","desc":"Two apps need a re-platform before Wave 2.","owner":"T. Bui","due":"Jul 25"},{"title":"Bandwidth to colo","impact":"med","likelihood":"low","status":"Resolved","desc":"Second circuit provisioned; contention resolved.","owner":"N. Do","due":"Jul 05"}],"lessons":[{"category":"well","title":"Automated inventory","text":"Agent-based discovery caught 9 undocumented services."},{"category":"improve","title":"Vendor lead times","text":"Cross-connect provisioning took 3 weeks longer than planned."},{"category":"know","title":"Runbook template","text":"The per-wave cutover runbook is reusable for future DC moves."}]}}</script>
   <script>
     (function(){
       try{
-        var raw=document.getElementById('savedData').textContent;
+        var raw=document.getElementById("savedData").textContent;
         var d=(JSON.parse(raw).data)||{};
         var m=d.meta||{}, tl=d.timeline||[];
         var pct=tl.length?Math.round(tl.reduce(function(s,t){return s+(Number(t.pct)||0)},0)/tl.length):0;
-        document.getElementById('tag').textContent=m.eyebrow||'Progress report';
-        document.getElementById('title').textContent=(m.titleLead||'')+' '+(m.titleAccent||'');
-        document.getElementById('by').textContent='By '+(m.presenter||'—')+' · '+(m.period||'')+' · '+(m.statusLabel||'');
-        document.getElementById('pct').textContent=pct+'%';
-        document.getElementById('rows').innerHTML=tl.map(function(t){return '<tr><td>'+(t.idx||'')+'</td><td>'+(t.title||'')+'</td><td>'+(t.dateStart||'')+' – '+(t.dateEnd||'')+'</td><td>'+(Number(t.pct)||0)+'%</td><td>'+(t.status||'')+'</td></tr>';}).join('');
-      }catch(e){ document.getElementById('title').textContent='Data Center Migration'; }
+        document.getElementById("tag").textContent=m.eyebrow||"Progress report";
+        document.getElementById("title").textContent=(m.titleLead||"")+" "+(m.titleAccent||"");
+        document.getElementById("by").textContent="By "+(m.presenter||"—")+" · "+(m.period||"")+" · "+(m.statusLabel||"");
+        document.getElementById("pct").textContent=pct+"%";
+        document.getElementById("rows").innerHTML=tl.map(function(t){return "<tr><td>"+(t.idx||"")+"</td><td>"+(t.title||"")+"</td><td>"+(t.dateStart||"")+" – "+(t.dateEnd||"")+"</td><td>"+(Number(t.pct)||0)+"%</td><td>"+(t.status||"")+"</td></tr>";}).join("");
+      }catch(e){ document.getElementById("title").textContent="Data Center Migration"; }
     })();
   </script>
 </body></html>
