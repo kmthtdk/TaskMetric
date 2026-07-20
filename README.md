@@ -44,6 +44,8 @@ Combine reads each file's embedded JSON (`<script id="savedData">`, any `applica
 
 `consolidator.html` is generated from `index.html` so it always matches the current design — rebuild it with `node scripts/build-consolidator.js` after changing the app.
 
+Full reference for this feature — data contract, the `extractReports` pipeline, the complete `adaptForeign` alias mapping, and how to extend it — is in [`docs/CONSOLIDATION.md`](docs/CONSOLIDATION.md).
+
 ## Tech
 
 Plain HTML + CSS + vanilla JavaScript. No frameworks, no bundler, no network calls at runtime.
